@@ -28,7 +28,10 @@
     <input type="submit" class="btn btn-info" value="Log In">
 </form>
 
-<p class="small my-3">
-    Don't have an account? <a href="{% url 'register' %}">Sign Up</a>
+<p class=" my-3">
+    Don't have an account? <a href="{% url 'register' %}"><i> Sign Up</i></a>
+</p>
+<p class=" my-3">
+   <a href="{% url 'password_reset' %}"><i> Forgot password?</i></a>
 </p>
 {% endblock content %}

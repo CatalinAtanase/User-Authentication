@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     # My apps
     'accounts.apps.AccountsConfig',
     'crispy_forms',
-    'widget_tweaks',
+    'widget_tweaks', # for forms
+    'django_cleanup', # delete old images
 ]
 
 MIDDLEWARE = [
