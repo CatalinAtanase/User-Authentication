@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import UserRegistration, UserUpdateForm, UserProfileForm
 from django.http import HttpResponse
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 def register(request):
@@ -49,7 +50,7 @@ def profile(request):
 
     return render(request, 'accounts/profile.html', context)
 
-
+@login_required
 def update_profile(request):
      # Take care of the POST req
     if request.method == 'POST':
