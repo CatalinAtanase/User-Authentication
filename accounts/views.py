@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import UserRegistration, UserUpdateForm, UserProfileForm
+from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -8,12 +8,13 @@ from django.contrib.auth.decorators import login_required
 def register(request):
     # Redirect logged in users
     if request.user.is_authenticated:
+        messages.info(request, f'You are already logged in!')
         return redirect('/accounts/profile')
     
     # First take care of the post req
     if request.method == 'POST':
         # Create a form and populate it with data from the req
-        form = UserRegistration(request.POST)
+        form = UserRegistrationForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -21,37 +22,17 @@ def register(request):
             return redirect('/accounts/login')
     else:
         # It's a get req so the form is empty
-        form = UserRegistration()
+        form = UserRegistrationForm()
     
     # Render the page
     return render(request, 'accounts/register.html', {'form': form})
 
 
 def profile(request):
-    # Take care of the POST req
-    if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        profile_form = UserProfileForm(request.POST, request.FILES, instance=request.user.profile)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, f'Your account has been updated.')
-            return redirect('profile')
-
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = UserProfileForm(instance=request.user.profile)
-
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
-
-    return render(request, 'accounts/profile.html', context)
+    return render(request, 'accounts/profile.html')
 
 @login_required
-def update_profile(request):
+def profile_update(request):
      # Take care of the POST req
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)

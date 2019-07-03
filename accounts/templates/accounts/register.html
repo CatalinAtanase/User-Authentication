@@ -9,23 +9,12 @@
 
     {% for field in form %}
         {% for error in field.errors %}          
-                {% if 'two password fields' in error %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Cele doua campuri de parola nu sunt identice!
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                {% elif 'password' in error %}
-                    
-                {% else %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{error}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                {% endif %}             
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{error}}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>           
         {% endfor %}
     {% endfor %}
 

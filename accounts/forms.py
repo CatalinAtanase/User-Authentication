@@ -3,38 +3,32 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
 from django.db import models
+from .validators import (
+    email_validator,
+    username_validator,
+)
+from .validation_messages import ValidationMessages
+from django.contrib.auth import forms as auth_forms
 
-class UserRegistration(UserCreationForm):
+from django.utils.translation import gettext, gettext_lazy as _
+
+
+class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField()
 
     User._meta.get_field('email')._unique = True
 
+    # Overwrite error messages
+    error_messages = {
+        'password_mismatch': ValidationMessages.password_mismatch,
+    }
+    
     def clean_username(self):
-        username_passed = self.cleaned_data.get('username')
-        if len(User.objects.filter(username=username_passed)) > 0:
-            raise forms.ValidationError('Exista deja un user cu acest nume de utilizator')
-        return username_passed
+        return username_validator(self.cleaned_data.get('username'))
 
     def clean_email(self):
-        email_passed = self.cleaned_data.get('email')
-        if len(User.objects.filter(email=email_passed)) > 0:
-            raise forms.ValidationError('Exista deja un user cu aceasta adresa de email')
-        
-        return email_passed
+        return email_validator(self.cleaned_data.get('email'))
 
-    def clean_password1(self):
-        password1 = self.cleaned_data.get('password1')
-        if len(password1) < 8:
-            raise forms.ValidationError('Parola trebuie sa fie de cel putin 8 caractere')
-        
-        return password1
-
-    # def clean_password2(self):
-    #     # Overwrite the method so u don't get 'Password is too short on both'
-    #     # errors = []
-    #     # raise forms.ValidationError(errors)
-    #     # return self.cleaned_data.get('password2')
-        
 
     class Meta:
         model = User
@@ -47,6 +41,14 @@ class UserRegistration(UserCreationForm):
 
 
 class UserUpdateForm(forms.ModelForm):
+
+    def clean_username(self):
+        return username_validator(self.cleaned_data.get('username'), self.instance.pk)
+
+    def clean_email(self):
+        return email_validator(self.cleaned_data.get('email'), self.instance.pk)
+
+    
     class Meta:
         model = User
         fields = [
@@ -61,4 +63,24 @@ class UserProfileForm(forms.ModelForm):
         fields = [
             'image',
         ]
+
+
+class CustomAuthenticationForm(auth_forms.AuthenticationForm):
+     error_messages = {
+        'invalid_login': ValidationMessages.invalid_login,
+        'inactive': ValidationMessages.inactive,
+    }
+
+
+class CustomPasswordChangeForm(auth_forms.PasswordChangeForm):
+    error_messages = {
+        'password_mismatch': ValidationMessages.password_mismatch,
+        'password_incorrect': ValidationMessages.password_incorrect,
+    }
+
+
+class CustomResetPasswordForm(auth_forms.SetPasswordForm):
+    error_messages = {
+        'password_mismatch': ValidationMessages.password_mismatch,
+    }
     
