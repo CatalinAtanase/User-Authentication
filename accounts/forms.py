@@ -14,8 +14,7 @@ from django.utils.translation import gettext, gettext_lazy as _
 
 
 class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField()
-
+    # Make email field unique
     User._meta.get_field('email')._unique = True
 
     # Overwrite error messages

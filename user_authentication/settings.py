@@ -53,7 +53,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # My middlewares
-    # 'icase.middleware.LowerCased',
 ]
 
 ROOT_URLCONF = 'user_authentication.urls'

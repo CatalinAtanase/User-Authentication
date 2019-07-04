@@ -6,10 +6,17 @@ from django.contrib.auth.decorators import login_required
 
 
 def register(request):
+    # Render an empty form and if it's a post req render one with the data
+    form = UserRegistrationForm()
+
     # Redirect logged in users
     if request.user.is_authenticated:
         messages.info(request, f'You are already logged in!')
-        return redirect('/accounts/profile')
+        # 
+        # Messages are stored in cookies and using redirect removes the cookie 
+        # strange enough cuz down there works on form.is_valid()
+        # 
+        return render(request, 'accounts/profile.html')
     
     # First take care of the post req
     if request.method == 'POST':
@@ -20,19 +27,21 @@ def register(request):
             form.save()
             messages.success(request, f'Your account has been created!')
             return redirect('/accounts/login')
-    else:
-        # It's a get req so the form is empty
-        form = UserRegistrationForm()
     
     # Render the page
-    return render(request, 'accounts/register.html', {'form': form})
+    return render(request, 'accounts/register.html', locals())
 
 
 def profile(request):
     return render(request, 'accounts/profile.html')
 
+#TODO make value for form fields to be the initial data if form.is_valid fails
 @login_required
 def profile_update(request):
+    # Render empty forms for get
+    user_form = UserUpdateForm(instance=request.user)
+    profile_form = UserProfileForm(instance=request.user.profile)
+
      # Take care of the POST req
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
@@ -44,16 +53,10 @@ def profile_update(request):
             messages.success(request, f'Your account has been updated.')
             return redirect('profile')
 
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = UserProfileForm(instance=request.user.profile)
+    return render(request, 'accounts/profile_update.html', locals())
 
-    context = {
-        'user_form': user_form,
-        'profile_form': profile_form
-    }
-
-    return render(request, 'accounts/profile_update.html', context)
+def error_404(request, exception):
+    return render(request, 'accounts/error_404.html', status=404)
 
 
 

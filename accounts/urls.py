@@ -7,7 +7,6 @@ from .forms import (
     CustomResetPasswordForm,
 )
 
-
 urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('profile/update', views.profile_update, name='profile_update'),
@@ -16,7 +15,7 @@ urlpatterns = [
          auth_views.LoginView.as_view(
              form_class=CustomAuthenticationForm,
              redirect_authenticated_user=True,
-             template_name='accounts/login.html'
+             template_name='accounts/login.html',
          ),
          name='login'
          ),
