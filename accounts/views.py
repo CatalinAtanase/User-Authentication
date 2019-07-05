@@ -1,8 +1,15 @@
 from django.shortcuts import render, redirect
-from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.models import User
+
+from .forms import UserRegistrationForm, UserUpdateForm, UserProfileForm
+from .tokens import account_activation_token
 
 
 def register(request):
@@ -24,8 +31,25 @@ def register(request):
         form = UserRegistrationForm(request.POST)
 
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Your account has been created!')
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            # Prepare mail
+            current_site = get_current_site(request)
+            subject = f'Activate your account on {current_site}'
+            message = render_to_string('accounts/email_verification.html', {
+                'user': user,
+                'protocol': request.scheme,
+                'domain': current_site.domain,
+                'site_name': current_site,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+
+            user.email_user(subject=subject, message=message)
+            
+            messages.success(request, f'Your account has been created and an email has been sent. Check your email to complete the registration.')
             return redirect('/accounts/login')
     
     # Render the page
@@ -57,6 +81,22 @@ def profile_update(request):
 
 def error_404(request, exception):
     return render(request, 'accounts/error_404.html', status=404)
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError,User.DoesNotExist):
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return redirect('login')
+    else:
+        return render(request, 'accounts/activation_invalid.html')
+
+
+
 
 
 

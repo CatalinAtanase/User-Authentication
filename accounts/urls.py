@@ -11,6 +11,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('profile/update', views.profile_update, name='profile_update'),
     path('register/', views.register, name='register'),
+    path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('login/',
          auth_views.LoginView.as_view(
              form_class=CustomAuthenticationForm,
